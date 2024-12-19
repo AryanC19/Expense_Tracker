@@ -19,9 +19,10 @@ class AddExpenseViewModel(val dao: ExpenseDao) : ViewModel() {
     }
 }
 
-class AddViewModelFactory(private val dao: ExpenseDao) : ViewModelProvider.Factory {
+class AddViewModelFactory(private val context: Context) : ViewModelProvider.Factory {
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
         if (modelClass.isAssignableFrom(AddExpenseViewModel::class.java)) {
+            val dao = ExpenseDataBase.getDatabase(context).expenseDao()  // Get DAO from the context
             return AddExpenseViewModel(dao) as T
         }
         throw IllegalArgumentException("Unknown ViewModel class")

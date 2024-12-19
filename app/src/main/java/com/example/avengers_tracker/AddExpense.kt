@@ -1,12 +1,8 @@
 package com.example.avengers_tracker
 
-import android.text.Layout
-import android.widget.GridLayout
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material3.Button
 import androidx.compose.material3.DatePicker
 import androidx.compose.material3.DatePickerDialog
@@ -14,9 +10,7 @@ import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.ExposedDropdownMenuDefaults
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -25,11 +19,13 @@ import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -37,13 +33,20 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.constraintlayout.compose.ConstraintLayout
-import androidx.constraintlayout.compose.Dimension
+import com.example.avengers_tracker.data.model.ExpenseEntity
 import com.example.avengers_tracker.ui.theme.InterFont
-import com.example.avengers_tracker.ui.theme.Zinc
+import com.example.avengers_tracker.viewmodel.AddExpenseViewModel
+import com.example.avengers_tracker.viewmodel.AddViewModelFactory
 import com.example.avengers_tracker.widgets.ExpenseTextView
+import kotlinx.coroutines.launch
 
 @Composable
 fun AddExpense() {
+
+    val viewModel =
+        AddViewModelFactory(LocalContext.current).create(AddExpenseViewModel::class.java)
+
+    val coroutineScope = rememberCoroutineScope();
     Surface(modifier = Modifier.fillMaxSize()) {
         ConstraintLayout(modifier = Modifier.fillMaxSize()) {
             val (nameRow, list, card, topBar) = createRefs()
@@ -90,19 +93,28 @@ fun AddExpense() {
 
             }
 
-            DataForm(modifier = Modifier
-                .padding(top = 60.dp)
-                .constrainAs(card) {
-                    top.linkTo(nameRow.bottom)
-                    start.linkTo(parent.start)
-                    end.linkTo(parent.end)
-                })
+            DataForm(
+                modifier = Modifier
+                    .padding(top = 60.dp)
+                    .constrainAs(card) {
+                        top.linkTo(nameRow.bottom)
+                        start.linkTo(parent.start)
+                        end.linkTo(parent.end)
+                    },
+                onAddExpenseClick = {
+                    coroutineScope.launch {
+
+                        viewModel.addExpense(it)
+                    }
+
+                }
+            )
         }
     }
 }
 
 @Composable
-fun DataForm(modifier: Modifier) {
+fun DataForm(modifier: Modifier, onAddExpenseClick: (model: ExpenseEntity) -> Unit) {
 
     val name = remember {
         mutableStateOf("")
@@ -120,6 +132,9 @@ fun DataForm(modifier: Modifier) {
         mutableStateOf(false)
     }
     val category = remember {
+        mutableStateOf("")
+    }
+    val type = remember {
         mutableStateOf("")
     }
 
@@ -228,7 +243,18 @@ fun DataForm(modifier: Modifier) {
 
 
         Button(
-            onClick = {}, modifier = Modifier
+            onClick = {
+                val model = ExpenseEntity(
+                    null,
+                    name.value,
+                    amount.value.toDoubleOrNull() ?: 0.0,
+                    category.value,
+                    Utils.formatDateToHumanReadableForm(date.value),
+                    type.value
+
+                )
+                onAddExpenseClick(model)
+            }, modifier = Modifier
                 .clip(RoundedCornerShape(8.dp))
                 .fillMaxWidth()
         ) {
