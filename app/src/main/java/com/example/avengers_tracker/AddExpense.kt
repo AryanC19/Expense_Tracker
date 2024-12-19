@@ -9,9 +9,8 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
-//import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -26,6 +25,7 @@ import androidx.compose.ui.unit.sp
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
 import com.example.avengers_tracker.ui.theme.Zinc
+import com.example.avengers_tracker.widgets.ExpenseTextView
 
 @Composable
 fun AddExpense() {
@@ -55,7 +55,7 @@ fun AddExpense() {
                     contentDescription = null,
                     modifier = Modifier.align(Alignment.CenterStart)
                 )
-                Text(
+                ExpenseTextView(
                     text = "Add Expense",
                     fontSize = 20.sp,
                     color = Color.White,
@@ -100,7 +100,7 @@ fun DataForm(modifier: Modifier) {
 
 
     ) {
-        Text(
+        ExpenseTextView(
             text = "Type",
             fontSize = 17.sp,
 
@@ -108,12 +108,11 @@ fun DataForm(modifier: Modifier) {
         OutlinedTextField(
             value = "",
             onValueChange = { },
-            label = "Enter Type",
             modifier = Modifier.fillMaxWidth()
         )
         Spacer(modifier = Modifier.height(16.dp))
 
-        Text(
+        ExpenseTextView(
             text = "Name",
             fontSize = 17.sp,
 
@@ -121,11 +120,10 @@ fun DataForm(modifier: Modifier) {
         OutlinedTextField(
             value = "",
             onValueChange = { },
-            label = "Enter Name",
             modifier = Modifier.fillMaxWidth()
         )
         Spacer(modifier = Modifier.height(16.dp))
-        Text(
+        ExpenseTextView(
             text = "Category",
             fontSize = 17.sp,
 
@@ -133,12 +131,11 @@ fun DataForm(modifier: Modifier) {
         OutlinedTextField(
             value = "",
             onValueChange = { },
-            label = "Enter Category",
             modifier = Modifier.fillMaxWidth()
         )
         Spacer(modifier = Modifier.height(16.dp))
 
-        Text(
+        ExpenseTextView(
             text = "Amount",
             fontSize = 17.sp,
 
@@ -146,11 +143,11 @@ fun DataForm(modifier: Modifier) {
         OutlinedTextField(
             value = "",
             onValueChange = { },
-            label = "Enter Amount",
+
             modifier = Modifier.fillMaxWidth()
         )
         Spacer(modifier = Modifier.height(16.dp))
-        Text(
+        ExpenseTextView(
             text = "Date",
             fontSize = 17.sp,
 
@@ -158,7 +155,6 @@ fun DataForm(modifier: Modifier) {
         OutlinedTextField(
             value = "",
             onValueChange = { },
-            label = "Enter Name",
             modifier = Modifier.fillMaxWidth()
         )
         Spacer(modifier = Modifier.height(16.dp))
@@ -167,7 +163,7 @@ fun DataForm(modifier: Modifier) {
                 .clip(RoundedCornerShape(8.dp))
                 .fillMaxWidth()
         ) {
-            Text(
+            ExpenseTextView(
                 text = "Add Expense",
                 color = Color.White,
                 fontSize = 14.sp,
@@ -179,33 +175,6 @@ fun DataForm(modifier: Modifier) {
 }
 
 
-@Composable
-fun OutlinedTextField(
-    value: String,
-    onValueChange: (String) -> Unit,
-    label: String,
-    modifier: Modifier = Modifier
-) {
-    Box(
-        modifier = modifier
-            .border(1.dp, Color.Gray)
-            .padding(8.dp)
-            .fillMaxWidth()
-    ) {
-        BasicTextField(
-            value = value,
-            onValueChange = onValueChange,
-            singleLine = true,
-            decorationBox = { innerTextField ->
-                if (value.isEmpty()) {
-                    Text(text = label, color = Color.Gray)
-                }
-                innerTextField()
-            },
-            modifier = Modifier.fillMaxWidth()
-        )
-    }
-}
 
 @Composable
 @Preview(showBackground = true)

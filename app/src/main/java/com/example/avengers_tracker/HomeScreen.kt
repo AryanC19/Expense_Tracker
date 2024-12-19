@@ -1,5 +1,7 @@
 package com.example.avengers_tracker
+
 import android.text.Layout
+import android.view.Surface
 import android.widget.GridLayout
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -9,12 +11,13 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
@@ -23,22 +26,31 @@ import androidx.compose.ui.unit.sp
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
 import com.example.avengers_tracker.ui.theme.Zinc
+import com.example.avengers_tracker.viewmodel.HomeViewModel
+import com.example.avengers_tracker.viewmodel.HomeViewModelFactory
+import com.example.avengers_tracker.widgets.ExpenseTextView
 
 @Composable
-fun HomeScreen(){
-    Surface(modifier = Modifier.fillMaxSize()){
+fun HomeScreen() {
+
+    val viewModel : HomeViewModel = HomeViewModelFactory(LocalContext.current).create(HomeViewModel::class.java)
+    Surface(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Color.White)
+    ) {
         ConstraintLayout(modifier = Modifier.fillMaxSize()) {
-            val(nameRow,list,card,topBar) =createRefs()
-            Image (painter = painterResource(id = R.drawable.ic_topbar),
+            val (nameRow, list, card, topBar) = createRefs()
+            Image(painter = painterResource(id = R.drawable.ic_topbar),
                 contentDescription = null,
                 modifier = Modifier
-                    .constrainAs(topBar){
+                    .constrainAs(topBar) {
                         top.linkTo(parent.top)
                         start.linkTo(parent.start)
                         end.linkTo(parent.end)
                     }
             )
-            
+
             Box(
                 Modifier
                     .fillMaxWidth()
@@ -48,21 +60,33 @@ fun HomeScreen(){
                         start.linkTo(parent.start)
                         end.linkTo(parent.end)
 
-                    }){
-                Column{
-                   Text(text ="Avengers Tracker",fontSize=16.sp, color = Color.White)
-                    Text(text ="Welcome to the Avengers Tracker",fontSize=20.sp, color = Color.White, fontWeight = FontWeight.Bold)
+                    }) {
+                Column {
+                    ExpenseTextView(
+                        text = "Avengers Tracker",
+                        fontSize = 16.sp,
+                        color = Color.White
+                    )
+                    ExpenseTextView(
+                        text = "Welcome to the Avengers Tracker",
+                        fontSize = 20.sp,
+                        color = Color.White,
+                        fontWeight = FontWeight.Bold
+                    )
 
                 }
 
-                Image(painter = painterResource(id = R.drawable.ic_notification),
+                Image(
+                    painter = painterResource(id = R.drawable.ic_notification),
                     contentDescription = null,
                     modifier = Modifier.align(Alignment.CenterEnd)
                 )
             }
-            
+
+            val state= viewModel.expenses.collectAsState(initial = emptyList())
+
             CardItem(modifier = Modifier
-                .constrainAs(card){
+                .constrainAs(card) {
                     top.linkTo(nameRow.bottom)
                     start.linkTo(parent.start)
                     end.linkTo(parent.end)
@@ -90,7 +114,7 @@ fun HomeScreen(){
 fun CardItem(
     modifier: Modifier,
 
-) {
+    ) {
     Column(
         modifier = modifier
             .padding(16.dp)
@@ -106,18 +130,19 @@ fun CardItem(
                 .weight(1f)
         ) {
             Column(modifier = Modifier.align(Alignment.CenterStart)) {
-                Text(
+                ExpenseTextView(
                     text = "Total Balance",
-                    fontSize=20.sp,
-                  //  style = Typography.titleMedium,
+                    fontSize = 20.sp,
+                    //  style = Typography.titleMedium,
                     color = Color.White
                 )
                 Spacer(modifier = Modifier.size(8.dp))
-                Text(
+                ExpenseTextView(
                     text = " $ 5000",
-                    fontSize=20.sp,
-                 //   style = Typography.headlineLarge,
+                    fontSize = 20.sp,
+                    //   style = Typography.headlineLarge,
                     color = Color.White,
+                    fontWeight = FontWeight.SemiBold,
                 )
             }
             Image(
@@ -132,13 +157,14 @@ fun CardItem(
                 .fillMaxWidth()
                 .weight(1f),
 
-        ) {
+            ) {
 
             CardRowItem(
                 modifier = Modifier.align(Alignment.CenterStart),
                 title = "Income",
                 amount = "$ 3654",
                 image = R.drawable.ic_income
+
             )
 
             Spacer(modifier = Modifier.size(8.dp))
@@ -159,44 +185,45 @@ fun CardItem(
 fun TransactionList(
     modifier: Modifier
 ) {
-            Column(modifier=modifier.padding(horizontal = 16.dp)) {
-                Box(modifier = modifier.fillMaxWidth()) {
-                    Text(
-                        text = "Recent Transactions",
-                        fontSize=20.sp,
-                    )
-                    Text(
-                        text = "See All",
-                        fontSize =16.sp,
+    Column(modifier = modifier.padding(horizontal = 16.dp)) {
+        Box(modifier = modifier.fillMaxWidth()) {
+            ExpenseTextView(
+                text = "Recent Transactions",
+                fontSize = 20.sp,
+            )
+            ExpenseTextView(
+                text = "See All",
+                fontSize = 16.sp,
 
-                        modifier=Modifier.align(Alignment.CenterEnd)
-                    )
-                }
-                TransactionItem(
-                    title = "Netflix",
-                    amount = "- $ 200",
-                    icon = R.drawable.ic_netflix,
-                    date = "Today",
-                    color = Color.Red,
+                modifier = Modifier.align(Alignment.CenterEnd)
+            )
+        }
+        TransactionItem(
+            title = "Netflix",
+            amount = "- $ 200",
+            icon = R.drawable.ic_netflix,
+            date = "Today",
+            color = Color.Red,
 
-                )
-                TransactionItem(
-                    title = "Youtube",
-                    amount = "- $ 100",
-                    icon = R.drawable.ic_youtube,
-                    date = "Today",
-                    color = Color.Red,
 
-                    )
-                TransactionItem(
-                    title = "Netflix",
-                    amount = "- $ 1200",
-                    icon = R.drawable.ic_starbucks,
-                    date = "Today",
-                    color = Color.Red,
+            )
+        TransactionItem(
+            title = "Youtube",
+            amount = "- $ 100",
+            icon = R.drawable.ic_youtube,
+            date = "Today",
+            color = Color.Red,
 
-                    )
-            }
+            )
+        TransactionItem(
+            title = "Netflix",
+            amount = "- $ 1200",
+            icon = R.drawable.ic_starbucks,
+            date = "Today",
+            color = Color.Red,
+
+            )
+    }
 
 }
 
@@ -209,7 +236,7 @@ fun TransactionItem(
     date: String,
     color: Color,
 
-) {
+    ) {
 
     Box(
         modifier = Modifier
@@ -224,20 +251,21 @@ fun TransactionItem(
             )
             Spacer(modifier = Modifier.size(8.dp))
             Column {
-                Text(text = title, fontSize = 16.sp, fontWeight = FontWeight.Medium)
+                ExpenseTextView(text = title, fontSize = 16.sp, fontWeight = FontWeight.Medium)
                 Spacer(modifier = Modifier.size(6.dp))
-                Text(text = date, fontSize = 13.sp, color = Color.Black)
+                ExpenseTextView(text = date, fontSize = 13.sp, color = Color.Black)
             }
         }
-        Text(
+        ExpenseTextView(
             text = amount,
-            fontSize = 18.sp,
-            fontWeight = FontWeight.Medium,
+            fontSize = 20.sp,
             modifier = Modifier.align(Alignment.CenterEnd),
-            color = color
+            color = color,
+            fontWeight = FontWeight.SemiBold
         )
     }
 }
+
 @Composable
 fun CardRowItem(modifier: Modifier, title: String, amount: String, image: Int) {
     Column(modifier = modifier) {
@@ -247,14 +275,20 @@ fun CardRowItem(modifier: Modifier, title: String, amount: String, image: Int) {
                 contentDescription = null,
             )
             Spacer(modifier = Modifier.size(8.dp))
-            Text(text = title,fontSize =16.sp, color = Color.White)
+            ExpenseTextView(text = title, fontSize = 16.sp, color = Color.White)
         }
         Spacer(modifier = Modifier.size(4.dp))
-        Text(text = amount,fontSize =20.sp, color = Color.White)
+        ExpenseTextView(
+            text = amount,
+            fontSize = 20.sp,
+            color = Color.White,
+
+            )
     }
 }
+
 @Composable
 @Preview
-fun PreviewHomeScreen(){
+fun PreviewHomeScreen() {
     HomeScreen()
 }
