@@ -10,11 +10,17 @@ import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material3.Button
 import androidx.compose.material3.DatePicker
 import androidx.compose.material3.DatePickerDialog
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExposedDropdownMenuBox
+import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.TextField
 import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
@@ -25,12 +31,14 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
+import com.example.avengers_tracker.ui.theme.InterFont
 import com.example.avengers_tracker.ui.theme.Zinc
 import com.example.avengers_tracker.widgets.ExpenseTextView
 
@@ -111,6 +119,9 @@ fun DataForm(modifier: Modifier) {
     val dateDialogVisibility = remember {
         mutableStateOf(false)
     }
+    val category = remember {
+        mutableStateOf("")
+    }
 
     Column(
         modifier = modifier
@@ -158,21 +169,21 @@ fun DataForm(modifier: Modifier) {
 
         )
 
-        Spacer(modifier = Modifier.size(8.dp))
+        Spacer(modifier = Modifier.size(12.dp))
 
         //date calendar
 
         ExpenseTextView(
-            text = "Amount",
+            text = "Date",
             fontSize = 14.sp,
         )
 
         Spacer(modifier = Modifier.size(8.dp))
 
         OutlinedTextField(
-            value = date.value.toString(),
+            value = if (date.value == 0L) "" else Utils.formatDateToHumanReadableForm(date.value),
             onValueChange = {
-                amount.value = it
+
             },
             modifier = Modifier
                 .fillMaxWidth()
@@ -180,10 +191,40 @@ fun DataForm(modifier: Modifier) {
             enabled = false
 
         )
+
+        Spacer(modifier = Modifier.size(12.dp))
+
         //dropdown list
+        ExpenseTextView(
+            text = "Category",
+            fontSize = 14.sp,
+        )
+        Spacer(modifier = Modifier.size(8.dp))
+        ExpenseDropDown(
+            listOf("Netflix", "Paypal", "Salary", "Upwork"),
+            onItemSelected = {
+                category.value = it
+            })
+
+        Spacer(modifier = Modifier.size(12.dp))
 
 
-        //type of
+        //type
+        ExpenseTextView(
+            text = "Type",
+            fontSize = 14.sp,
+        )
+        Spacer(modifier = Modifier.size(8.dp))
+        ExpenseDropDown(
+            listOf("Expense", "Income"),
+            onItemSelected = {
+                category.value = it
+            })
+
+        Spacer(modifier = Modifier.size(12.dp))
+
+
+        //button Add expense
 
 
         Button(
@@ -235,6 +276,41 @@ fun ExpenseDatePickerDialog(
     }
 }
 
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun ExpenseDropDown(listOfItems: List<String>, onItemSelected: (item: String) -> Unit) {
+    val expanded = remember {
+        mutableStateOf(false)
+    }
+    val selectedItem = remember {
+        mutableStateOf(listOfItems[0])
+    }
+    ExposedDropdownMenuBox(expanded = expanded.value, onExpandedChange = { expanded.value = it }) {
+        TextField(
+            value = selectedItem.value,
+            onValueChange = {},
+            modifier = Modifier
+                .fillMaxWidth()
+                .menuAnchor(),
+            textStyle = TextStyle(fontFamily = InterFont, color = Color.Black),
+            readOnly = true,
+            trailingIcon = {
+                ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded.value)
+            },
+
+            )
+        ExposedDropdownMenu(expanded = expanded.value, onDismissRequest = { }) {
+            listOfItems.forEach {
+                DropdownMenuItem(text = { Text(text = it) }, onClick = {
+                    selectedItem.value = it
+                    onItemSelected(selectedItem.value)
+                    expanded.value = false
+                })
+            }
+        }
+    }
+}
 
 @Composable
 @Preview(showBackground = true)
