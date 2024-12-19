@@ -3,6 +3,7 @@ package com.example.avengers_tracker.viewmodel
 import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
+import com.example.avengers_tracker.R
 import com.example.avengers_tracker.data.ExpenseDataBase
 import com.example.avengers_tracker.data.dao.ExpenseDao
 import com.example.avengers_tracker.data.model.ExpenseEntity
@@ -44,12 +45,25 @@ class HomeViewModel(dao: ExpenseDao) : ViewModel() {
         return "$ ${total}"
 
     }
+
+    fun getItemIcon(item: ExpenseEntity): Int {
+        if (item.category == "Netflix") {
+            return R.drawable.ic_netflix
+        } else if (item.category == "Paypal") {
+            return R.drawable.ic_paypal
+        } else if (item.category == "Starbucks") {
+            return R.drawable.ic_starbucks
+        } else {
+            return R.drawable.ic_expense
+        }
+
+    }
 }
 
-class HomeViewModelFactory(private val context: Context): ViewModelProvider.Factory {
+class HomeViewModelFactory(private val context: Context) : ViewModelProvider.Factory {
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
         if (modelClass.isAssignableFrom(HomeViewModel::class.java)) {
-            val dao= ExpenseDataBase.getDatabase(context).expenseDao()
+            val dao = ExpenseDataBase.getDatabase(context).expenseDao()
             @Suppress("UNCHECKED_CAST")
             return HomeViewModel(dao) as T
         }

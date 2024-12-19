@@ -8,6 +8,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -25,6 +26,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
+import com.example.avengers_tracker.data.model.ExpenseEntity
 import com.example.avengers_tracker.ui.theme.Zinc
 import com.example.avengers_tracker.viewmodel.HomeViewModel
 import com.example.avengers_tracker.viewmodel.HomeViewModelFactory
@@ -33,7 +35,8 @@ import com.example.avengers_tracker.widgets.ExpenseTextView
 @Composable
 fun HomeScreen() {
 
-    val viewModel : HomeViewModel = HomeViewModelFactory(LocalContext.current).create(HomeViewModel::class.java)
+    val viewModel: HomeViewModel =
+        HomeViewModelFactory(LocalContext.current).create(HomeViewModel::class.java)
     Surface(
         modifier = Modifier
             .fillMaxSize()
@@ -83,14 +86,19 @@ fun HomeScreen() {
                 )
             }
 
-            val state= viewModel.expenses.collectAsState(initial = emptyList())
+            //to store the chanign fields
+            val state = viewModel.expenses.collectAsState(initial = emptyList())
+            val expense = viewModel.getTotalExpense(state.value)
+            val income = viewModel.getTotalIncome(state.value)
+            val balance = viewModel.getBalance(state.value)
 
-            CardItem(modifier = Modifier
-                .constrainAs(card) {
+            CardItem(
+                modifier = Modifier.constrainAs(card) {
                     top.linkTo(nameRow.bottom)
                     start.linkTo(parent.start)
                     end.linkTo(parent.end)
-                }
+                },
+                balance = balance, income = income, expense = expense
             )
             TransactionList(
                 modifier = Modifier
@@ -101,8 +109,8 @@ fun HomeScreen() {
                         end.linkTo(parent.end)
                         bottom.linkTo(parent.bottom)
                         height = Dimension.fillToConstraints
-                    }
-
+                    },
+                list = state.value, viewModel = viewModel
             )
 
         }
@@ -113,6 +121,9 @@ fun HomeScreen() {
 @Composable
 fun CardItem(
     modifier: Modifier,
+    balance: String,
+    income: String,
+    expense: String,
 
     ) {
     Column(
@@ -138,7 +149,7 @@ fun CardItem(
                 )
                 Spacer(modifier = Modifier.size(8.dp))
                 ExpenseTextView(
-                    text = " $ 5000",
+                    text = balance,
                     fontSize = 20.sp,
                     //   style = Typography.headlineLarge,
                     color = Color.White,
@@ -162,7 +173,7 @@ fun CardItem(
             CardRowItem(
                 modifier = Modifier.align(Alignment.CenterStart),
                 title = "Income",
-                amount = "$ 3654",
+                amount = income,
                 image = R.drawable.ic_income
 
             )
@@ -172,7 +183,7 @@ fun CardItem(
             CardRowItem(
                 modifier = Modifier.align(Alignment.CenterEnd),
                 title = "Expense",
-                amount = "$ 2132",
+                amount = expense,
                 image = R.drawable.ic_expense
             )
 
@@ -183,48 +194,36 @@ fun CardItem(
 
 @Composable
 fun TransactionList(
-    modifier: Modifier
-) {
-    Column(modifier = modifier.padding(horizontal = 16.dp)) {
-        Box(modifier = modifier.fillMaxWidth()) {
-            ExpenseTextView(
-                text = "Recent Transactions",
-                fontSize = 20.sp,
-            )
-            ExpenseTextView(
-                text = "See All",
-                fontSize = 16.sp,
+    modifier: Modifier = Modifier,
+    list: List<ExpenseEntity>,
 
-                modifier = Modifier.align(Alignment.CenterEnd)
+    viewModel: HomeViewModel
+) {
+    LazyColumn(modifier = modifier.padding(horizontal = 16.dp)) {
+        item {
+            Box(modifier = modifier.fillMaxWidth()) {
+                ExpenseTextView(
+                    text = "Recent Transactions",
+                    fontSize = 20.sp,
+                )
+                ExpenseTextView(
+                    text = "See All",
+                    fontSize = 16.sp,
+                    modifier = Modifier.align(Alignment.CenterEnd)
+                )
+            }
+        }
+
+        items(list) { item ->
+            TransactionItem(
+                title = item.title,
+                amount = item.amount.toString(),
+                icon = viewModel.getItemIcon(item),
+                date = item.date.toString(), // Fixed `item.data` to `item.date`
+                color = if (item.type == "Income") Color.Green else Color.Red
             )
         }
-        TransactionItem(
-            title = "Netflix",
-            amount = "- $ 200",
-            icon = R.drawable.ic_netflix,
-            date = "Today",
-            color = Color.Red,
-
-
-            )
-        TransactionItem(
-            title = "Youtube",
-            amount = "- $ 100",
-            icon = R.drawable.ic_youtube,
-            date = "Today",
-            color = Color.Red,
-
-            )
-        TransactionItem(
-            title = "Netflix",
-            amount = "- $ 1200",
-            icon = R.drawable.ic_starbucks,
-            date = "Today",
-            color = Color.Red,
-
-            )
     }
-
 }
 
 
