@@ -4,13 +4,16 @@ import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.DatePicker
 import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.ExposedDropdownMenuDefaults
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -70,11 +73,15 @@ fun AddExpense(navController: NavController) {
                     end.linkTo(parent.end)
 
                 }) {
-                Image(
-                    painter = painterResource(id = R.drawable.ic_back),
-                    contentDescription = null,
+                IconButton(
+                    onClick = { navController.navigateUp() },
                     modifier = Modifier.align(Alignment.CenterStart)
-                )
+                ) {
+                    Image(
+                        painter = painterResource(id = R.drawable.ic_back),
+                        contentDescription = "Navigate back"
+                    )
+                }
                 ExpenseTextView(
                     text = "Add Expense",
                     fontSize = 20.sp,
@@ -151,76 +158,82 @@ fun DataForm(modifier: Modifier, onAddExpenseClick: (model: ExpenseEntity) -> Un
             .background(Color.White)
             .padding(16.dp)
             .verticalScroll(rememberScrollState())
-
-
     ) {
+
+        //Title
         ExpenseTextView(
+            color = Color.Black,
             text = "Title",
             fontSize = 14.sp,
         )
         Spacer(modifier = Modifier.size(8.dp))
-
         OutlinedTextField(
             value = name.value,
             onValueChange = {
                 name.value = it
             },
-            modifier = Modifier.fillMaxWidth()
-
+            modifier = Modifier.fillMaxWidth(),
+            textStyle = TextStyle(
+                color = Color.Black // Replace with your desired color
+            )
         )
-
         Spacer(modifier = Modifier.size(16.dp))
-
-
+        //Amount
         ExpenseTextView(
+            color = Color.Black,
             text = "Amount",
             fontSize = 14.sp,
         )
-
         Spacer(modifier = Modifier.size(8.dp))
-
         OutlinedTextField(
             value = amount.value,
             onValueChange = {
                 amount.value = it
             },
-            modifier = Modifier.fillMaxWidth()
-
+            modifier = Modifier.fillMaxWidth(),
+            textStyle = TextStyle(
+                color = Color.Blue // Replace with your desired color
+            )
         )
-
         Spacer(modifier = Modifier.size(12.dp))
 
         //date calendar
 
         ExpenseTextView(
+            color = Color.Black,
             text = "Date",
             fontSize = 14.sp,
         )
+
 
         Spacer(modifier = Modifier.size(8.dp))
 
         OutlinedTextField(
             value = if (date.value == 0L) "" else Utils.formatDateToHumanReadableForm(date.value),
-            onValueChange = {
-
-            },
+            onValueChange = {},
             modifier = Modifier
                 .fillMaxWidth()
                 .clickable { dateDialogVisibility.value = true },
-            enabled = false
-
+            enabled = false,
+            textStyle = TextStyle(color = Color.Black),
+            colors = OutlinedTextFieldDefaults.colors(
+                disabledTextColor = Color.Black,
+                disabledBorderColor = Color.Gray,
+                disabledPlaceholderColor = Color.Gray,
+                disabledContainerColor = Color.White
+            )
         )
-
         Spacer(modifier = Modifier.size(12.dp))
 
-        //dropdown list
+        //Category
         ExpenseTextView(
+            color = Color.Black,
             text = "Category",
             fontSize = 14.sp,
         )
         Spacer(modifier = Modifier.size(8.dp))
         ExpenseDropDown(
-            listOf("Netflix", "Paypal", "Salary", "Upwork"),
+            listOf("GooglePay", "Paypal", "PhonePay", "Cash", "PayTM", "Visa"),
             onItemSelected = {
                 category.value = it
             })
@@ -228,8 +241,9 @@ fun DataForm(modifier: Modifier, onAddExpenseClick: (model: ExpenseEntity) -> Un
         Spacer(modifier = Modifier.size(12.dp))
 
 
-        //type
+        //Type (Income,Expense)
         ExpenseTextView(
+            color = Color.Black,
             text = "Type",
             fontSize = 14.sp,
         )
@@ -237,35 +251,36 @@ fun DataForm(modifier: Modifier, onAddExpenseClick: (model: ExpenseEntity) -> Un
         ExpenseDropDown(
             listOf("Expense", "Income"),
             onItemSelected = {
-                category.value = it
+                type.value = it
             })
 
         Spacer(modifier = Modifier.size(12.dp))
 
 
-        //button Add expense
-
+        //Button, Main Passes to ROOMDB
 
         Button(
             onClick = {
                 val model = ExpenseEntity(
-                    null,
-                    name.value,
-                    amount.value.toDoubleOrNull() ?: 0.0,
-                    category.value,
-                    Utils.formatDateToHumanReadableForm(date.value),
-                    type.value
-
+                    id = null,
+                    title = name.value,
+                    amount = amount.value.toDoubleOrNull() ?: 0.0,
+                    date = Utils.formatDateToHumanReadableForm(date.value),
+                    category = category.value,
+                    type = type.value
                 )
                 onAddExpenseClick(model)
             }, modifier = Modifier
                 .clip(RoundedCornerShape(8.dp))
-                .fillMaxWidth()
+                .align(Alignment.CenterHorizontally),
+            colors = ButtonDefaults.buttonColors(
+                containerColor = Color(0xFF40E0D0) // Turquoise color
+            )
         ) {
             ExpenseTextView(
-                text = "Add Expense",
+                text = "Save",
                 color = Color.White,
-                fontSize = 14.sp,
+                fontSize = 18.sp,
 
                 )
 
@@ -309,6 +324,7 @@ fun ExpenseDatePickerDialog(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
+
 fun ExpenseDropDown(listOfItems: List<String>, onItemSelected: (item: String) -> Unit) {
     val expanded = remember {
         mutableStateOf(false)
@@ -325,6 +341,12 @@ fun ExpenseDropDown(listOfItems: List<String>, onItemSelected: (item: String) ->
                 .menuAnchor(),
             textStyle = TextStyle(fontFamily = InterFont, color = Color.Black),
             readOnly = true,
+            colors = ExposedDropdownMenuDefaults.textFieldColors(
+                focusedTextColor = Color.Black,
+                unfocusedTextColor = Color.Black,
+                focusedContainerColor = Color.White,
+                unfocusedContainerColor = Color.White
+            ),
             trailingIcon = {
                 ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded.value)
             },

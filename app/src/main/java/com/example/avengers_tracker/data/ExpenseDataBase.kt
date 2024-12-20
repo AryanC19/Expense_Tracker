@@ -1,6 +1,7 @@
 package com.example.avengers_tracker.data
 
 import android.content.Context
+import androidx.constraintlayout.core.motion.utils.Utils
 import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
@@ -40,39 +41,13 @@ abstract class ExpenseDataBase : RoomDatabase() {
                         val dao = getDatabase(context).expenseDao()
                         dao.insertExpense(
                             ExpenseEntity(
-                                1,
-                                "Salary",
-                                5000.0,
-                                System.currentTimeMillis().toString(),
-                                "Starbucks",
-                                type = "Income"
-                            )
-                        )
-                        dao.insertExpense(
-                            ExpenseEntity(
-                                2, "Rent", 5300.0,
-                                System.currentTimeMillis().toString(),
-                                "Netflix",
-                                type = "Expense"
-                            )
-                        )
-                        dao.insertExpense(
-                            ExpenseEntity(
-                                3,
-                                "Starbucks",
-                                1000.0,
-                                System.currentTimeMillis().toString(),
-                                "Expense",
-                                type = "Expense"
-                            )
-                        )
-                        dao.insertExpense(
-                            ExpenseEntity(
                                 4,
-                                "Starbucks",
+                                "WebFluid",
                                 1000.0,
-                                System.currentTimeMillis().toString(),
-                                "Expense",
+                                com.example.avengers_tracker.Utils.formatDateToHumanReadableForm(
+                                    System.currentTimeMillis()
+                                ),
+                                "GooglePay",
                                 type = "Expense"
                             )
                         )

@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "1053774791569",
+    "project_id": "flobiz-1862b",
+    "storage_bucket": "flobiz-1862b.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1053774791569:android:c1a1c74602ed2b8ddf1030",
+        "android_client_info": {
+          "package_name": "com.example.avengers_tracker"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "1053774791569-hgco6d11bgnjko5471361c2n9q8and2t.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.avengers_tracker",
+            "certificate_hash": "7e59114b0ff78d7ae3c9789c28b1019646b8c427"
+          }
+        },
+        {
+          "client_id": "1053774791569-9n690ski5aom67at31bsc3eqjd47facf.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBdrKrZfsgNpJs6TQZD7H42SG5Amil32RQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "1053774791569-9n690ski5aom67at31bsc3eqjd47facf.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

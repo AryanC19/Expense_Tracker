@@ -1,6 +1,7 @@
 package com.example.avengers_tracker.viewmodel
 
 import android.content.Context
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import com.example.avengers_tracker.R
@@ -38,23 +39,29 @@ class HomeViewModel(dao: ExpenseDao) : ViewModel() {
     fun getTotalExpense(list: List<ExpenseEntity>): String {
         var total = 0.0
         list.forEach {
-            if (it.type == "Income") {
+            if (it.type == "Expense") {
                 total += it.amount
+            } else {
+                Log.d("ExpenseDebug", "Skipping item: ${it.title}, type: ${it.type}")
             }
         }
         return "$ ${total}"
-
     }
 
+
     fun getItemIcon(item: ExpenseEntity): Int {
-        if (item.category == "Netflix") {
-            return R.drawable.ic_netflix
+        return if (item.category == "GooglePay") {
+            R.drawable.ic_google
         } else if (item.category == "Paypal") {
-            return R.drawable.ic_paypal
-        } else if (item.category == "Starbucks") {
-            return R.drawable.ic_starbucks
+            R.drawable.ic_paypal
+        } else if (item.category == "PhonePay") {
+            R.drawable.ic_phonepay
+        } else if (item.category == "PayTM") {
+            R.drawable.ic_paytm
+        } else if (item.category == "Visa") {
+            R.drawable.ic_visa
         } else {
-            return R.drawable.ic_expense
+            R.drawable.ic_cash
         }
 
     }

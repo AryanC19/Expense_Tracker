@@ -74,7 +74,7 @@ fun HomeScreen(navController: NavController) {
                         color = Color.White
                     )
                     ExpenseTextView(
-                        text = "Welcome to the Avengers Tracker",
+                        text = "Welcome to your expenses",
                         fontSize = 20.sp,
                         color = Color.White,
                         fontWeight = FontWeight.Bold
@@ -89,7 +89,7 @@ fun HomeScreen(navController: NavController) {
                 )
             }
 
-            //to store the chanign fields
+            //to store the changing fields
             val state = viewModel.expenses.collectAsState(initial = emptyList())
             val expense = viewModel.getTotalExpense(state.value)
             val income = viewModel.getTotalIncome(state.value)
@@ -118,6 +118,7 @@ fun HomeScreen(navController: NavController) {
 
             Image(
                 painter = painterResource(id = R.drawable.ic_add),
+
                 contentDescription = null,
                 modifier = Modifier
                     .size(50.dp)
@@ -128,6 +129,7 @@ fun HomeScreen(navController: NavController) {
                         bottom.linkTo(parent.bottom, margin = 16.dp)
                         end.linkTo(parent.end, margin = 16.dp)
                     }
+                    .background(Color.Green, shape = CircleShape)
                     .size(48.dp)
                     .clip(CircleShape)
                     .clickable {
@@ -167,14 +169,12 @@ fun CardItem(
                 ExpenseTextView(
                     text = "Total Balance",
                     fontSize = 20.sp,
-                    //  style = Typography.titleMedium,
                     color = Color.White
                 )
                 Spacer(modifier = Modifier.size(8.dp))
                 ExpenseTextView(
                     text = balance,
                     fontSize = 20.sp,
-                    //   style = Typography.headlineLarge,
                     color = Color.White,
                     fontWeight = FontWeight.SemiBold,
                 )
@@ -242,7 +242,7 @@ fun TransactionList(
                 title = item.title,
                 amount = item.amount.toString(),
                 icon = viewModel.getItemIcon(item),
-                date = item.date.toString(), // Fixed `item.data` to `item.date`
+                date = item.date.toString(),
                 color = if (item.type == "Income") Color.Green else Color.Red
             )
         }
@@ -275,7 +275,7 @@ fun TransactionItem(
             Column {
                 ExpenseTextView(text = title, fontSize = 16.sp, fontWeight = FontWeight.Medium)
                 Spacer(modifier = Modifier.size(6.dp))
-                ExpenseTextView(text = date, fontSize = 13.sp, color = Color.Black)
+                ExpenseTextView(text = date, fontSize = 13.sp, color = Color.White)
             }
         }
         ExpenseTextView(
