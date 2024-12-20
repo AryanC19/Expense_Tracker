@@ -9,6 +9,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -26,6 +27,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
+import androidx.navigation.NavController
+import androidx.navigation.compose.rememberNavController
 import com.example.avengers_tracker.data.model.ExpenseEntity
 import com.example.avengers_tracker.ui.theme.Zinc
 import com.example.avengers_tracker.viewmodel.HomeViewModel
@@ -33,7 +36,7 @@ import com.example.avengers_tracker.viewmodel.HomeViewModelFactory
 import com.example.avengers_tracker.widgets.ExpenseTextView
 
 @Composable
-fun HomeScreen() {
+fun HomeScreen(navController: NavController) {
 
     val viewModel: HomeViewModel =
         HomeViewModelFactory(LocalContext.current).create(HomeViewModel::class.java)
@@ -43,7 +46,7 @@ fun HomeScreen() {
             .background(Color.White)
     ) {
         ConstraintLayout(modifier = Modifier.fillMaxSize()) {
-            val (nameRow, list, card, topBar) = createRefs()
+            val (nameRow, list, card, topBar, add) = createRefs()
             Image(painter = painterResource(id = R.drawable.ic_topbar),
                 contentDescription = null,
                 modifier = Modifier
@@ -112,6 +115,26 @@ fun HomeScreen() {
                     },
                 list = state.value, viewModel = viewModel
             )
+
+            Image(
+                painter = painterResource(id = R.drawable.ic_add),
+                contentDescription = null,
+                modifier = Modifier
+                    .size(50.dp)
+                    .clickable {
+                        navController.navigate("/add")
+                    }
+                    .constrainAs(add) {
+                        bottom.linkTo(parent.bottom, margin = 16.dp)
+                        end.linkTo(parent.end, margin = 16.dp)
+                    }
+                    .size(48.dp)
+                    .clip(CircleShape)
+                    .clickable {
+                        navController.navigate("/add")
+                    }
+            )
+
 
         }
 
@@ -289,5 +312,5 @@ fun CardRowItem(modifier: Modifier, title: String, amount: String, image: Int) {
 @Composable
 @Preview
 fun PreviewHomeScreen() {
-    HomeScreen()
+    HomeScreen(rememberNavController())
 }

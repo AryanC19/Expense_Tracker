@@ -33,6 +33,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.constraintlayout.compose.ConstraintLayout
+import androidx.navigation.NavController
+import androidx.navigation.compose.rememberNavController
 import com.example.avengers_tracker.data.model.ExpenseEntity
 import com.example.avengers_tracker.ui.theme.InterFont
 import com.example.avengers_tracker.viewmodel.AddExpenseViewModel
@@ -41,7 +43,7 @@ import com.example.avengers_tracker.widgets.ExpenseTextView
 import kotlinx.coroutines.launch
 
 @Composable
-fun AddExpense() {
+fun AddExpense(navController: NavController) {
 
     val viewModel =
         AddViewModelFactory(LocalContext.current).create(AddExpenseViewModel::class.java)
@@ -103,8 +105,10 @@ fun AddExpense() {
                     },
                 onAddExpenseClick = {
                     coroutineScope.launch {
-
-                        viewModel.addExpense(it)
+                        if (
+                            viewModel.addExpense(it)) {
+                            navController.popBackStack()
+                        }
                     }
 
                 }
@@ -341,6 +345,6 @@ fun ExpenseDropDown(listOfItems: List<String>, onItemSelected: (item: String) ->
 @Composable
 @Preview(showBackground = true)
 fun AddExpensePreview() {
-    AddExpense()
+    AddExpense(rememberNavController())
 
 }
