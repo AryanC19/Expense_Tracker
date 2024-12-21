@@ -5,9 +5,8 @@ This repository contains the **Expense Manager App** built using **Kotlin** and 
 ### Key Features:
 - **Transaction Entry**: Log expenses and incomes, including date, type, amount, and description.
 - **Dashboard/Transaction List**: View, update, or delete transactions with a clean and intuitive UI.
-- **Filtering**: Search and filter transactions by description or type (Income/Expense).
-- **Firebase Integration**: User authentication with Google and data storage using Firebase.
-- **UI Components**: Material design elements, bottom navigation, and a simple, easy-to-use interface.
+- **Firebase Integration**: User authentication with Google using Firebase.
+- **UI Components**: Material design elements and a simple, easy-to-use interface.
 
 ### Technologies Used:
 - **Kotlin**
@@ -15,7 +14,7 @@ This repository contains the **Expense Manager App** built using **Kotlin** and 
 - **Firebase**
 - **MVVM Architecture**
 - **Coroutines for Asynchronous Operations**
-- **Hilt/Dagger for Dependency Injection**
+
 
 ### Screenshots:
 
