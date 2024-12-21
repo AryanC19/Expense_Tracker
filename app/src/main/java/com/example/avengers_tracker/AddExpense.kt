@@ -28,6 +28,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
@@ -57,16 +58,25 @@ fun AddExpense(navController: NavController) {
     val coroutineScope = rememberCoroutineScope();
     Surface(modifier = Modifier.fillMaxSize()) {
         ConstraintLayout(modifier = Modifier.fillMaxSize()) {
-            val (nameRow, list, card, topBar) = createRefs()
-            Image(painter = painterResource(id = R.drawable.ic_topbar),
+
+            val (nameRow, list, card, topBar, add, backgroundImage) = createRefs()
+
+            // Background Image
+            Image(
+                painter = painterResource(id = R.drawable.ic_avenger),
                 contentDescription = null,
                 modifier = Modifier
-                    .constrainAs(topBar) {
+                    .constrainAs(backgroundImage) {
                         top.linkTo(parent.top)
                         start.linkTo(parent.start)
                         end.linkTo(parent.end)
-                    })
+                        bottom.linkTo(parent.bottom)
+                    }
+                    .fillMaxSize() // Ensure the image covers the full screen
 
+                    .alpha(0.2f) // Optional: Reduce opacity to make it a background
+
+            )
             Box(modifier = Modifier
                 .fillMaxWidth()
                 .padding(top = 32.dp, start = 16.dp, end = 16.dp)
@@ -91,7 +101,7 @@ fun AddExpense(navController: NavController) {
                     color = Color.White,
                     fontWeight = FontWeight.Bold,
                     modifier = Modifier
-                        .padding(16.dp)
+                        .padding(4.dp)
                         .align(Alignment.Center)
 
                 )
@@ -102,12 +112,11 @@ fun AddExpense(navController: NavController) {
                     modifier = Modifier.align(Alignment.CenterEnd)
                 )
 
-
             }
 
             DataForm(
                 modifier = Modifier
-                    .padding(top = 60.dp)
+                    .padding(top = 10.dp)
                     .constrainAs(card) {
                         top.linkTo(nameRow.bottom)
                         start.linkTo(parent.start)
@@ -145,29 +154,32 @@ fun DataForm(modifier: Modifier, onAddExpenseClick: (model: ExpenseEntity) -> Un
             .fillMaxWidth()
             .shadow(8.dp)
             .clip(RoundedCornerShape(16.dp))
-            .background(Color.White)
+            .background(Color(0xFFECF5EF).copy(alpha = 0.1f)) // Grey with transparency
+            .alpha(0.9f)
             .padding(16.dp)
             .verticalScroll(rememberScrollState())
     ) {
         // Title
         ExpenseTextView(
-            color = Color.Black,
+            color = Color.White,
             text = "Title",
             fontSize = 14.sp,
+            fontWeight = FontWeight.Bold
         )
         Spacer(modifier = Modifier.size(8.dp))
         OutlinedTextField(
             value = name.value,
             onValueChange = { name.value = it },
             modifier = Modifier.fillMaxWidth(),
-            textStyle = TextStyle(color = Color.Black)
+            textStyle = TextStyle(color = Color.White)
         )
 
         Spacer(modifier = Modifier.size(16.dp))
 
         // Amount
         ExpenseTextView(
-            color = Color.Black,
+            fontWeight = FontWeight.Bold,
+            color = Color.White,
             text = "Amount",
             fontSize = 14.sp,
         )
@@ -176,15 +188,16 @@ fun DataForm(modifier: Modifier, onAddExpenseClick: (model: ExpenseEntity) -> Un
             value = amount.value,
             onValueChange = { amount.value = it },
             modifier = Modifier.fillMaxWidth(),
-            textStyle = TextStyle(color = Color.Blue)
+            textStyle = TextStyle(color = Color.White)
         )
 
         // Date
         Spacer(modifier = Modifier.size(12.dp))
         ExpenseTextView(
-            color = Color.Black,
+            color = Color.White,
             text = "Date",
             fontSize = 14.sp,
+            fontWeight = FontWeight.Bold,
         )
         Spacer(modifier = Modifier.size(8.dp))
         OutlinedTextField(
@@ -194,20 +207,21 @@ fun DataForm(modifier: Modifier, onAddExpenseClick: (model: ExpenseEntity) -> Un
                 .fillMaxWidth()
                 .clickable { dateDialogVisibility.value = true },
             enabled = false,
-            textStyle = TextStyle(color = Color.Black),
+            textStyle = TextStyle(color = Color.White),
             colors = OutlinedTextFieldDefaults.colors(
-                disabledTextColor = Color.Black,
+                disabledTextColor = Color.White,
                 disabledBorderColor = Color.Gray,
                 disabledPlaceholderColor = Color.Gray,
-                disabledContainerColor = Color.White
-            )
+
+                )
         )
 
         Spacer(modifier = Modifier.size(12.dp))
 
         // Category
         ExpenseTextView(
-            color = Color.Black,
+            fontWeight = FontWeight.Bold,
+            color = Color.White,
             text = "Category",
             fontSize = 14.sp,
         )
@@ -221,7 +235,8 @@ fun DataForm(modifier: Modifier, onAddExpenseClick: (model: ExpenseEntity) -> Un
 
         // Type (Income, Expense)
         ExpenseTextView(
-            color = Color.Black,
+            fontWeight = FontWeight.Bold,
+            color = Color.White,
             text = "Type",
             fontSize = 14.sp,
         )
@@ -271,7 +286,7 @@ fun DataForm(modifier: Modifier, onAddExpenseClick: (model: ExpenseEntity) -> Un
                 .clip(RoundedCornerShape(8.dp))
                 .align(Alignment.CenterHorizontally),
             colors = ButtonDefaults.buttonColors(
-                containerColor = Color(0xFF40E0D0) // Turquoise color
+                containerColor = Color(0xFF5B625B) // Turquoise color
             )
         ) {
             ExpenseTextView(
@@ -334,14 +349,14 @@ fun ExpenseDropDown(listOfItems: List<String>, onItemSelected: (item: String) ->
             modifier = Modifier
                 .fillMaxWidth()
                 .menuAnchor(),
-            textStyle = TextStyle(fontFamily = InterFont, color = Color.Black),
+            textStyle = TextStyle(fontFamily = InterFont, color = Color.White),
             readOnly = true,
             colors = ExposedDropdownMenuDefaults.textFieldColors(
-                focusedTextColor = Color.Black,
-                unfocusedTextColor = Color.Black,
-                focusedContainerColor = Color.White,
-                unfocusedContainerColor = Color.White
-            ),
+                focusedTextColor = Color.White,
+                unfocusedTextColor = Color.White,
+
+
+                ),
             trailingIcon = {
                 ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded.value)
             },

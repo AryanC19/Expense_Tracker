@@ -28,6 +28,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
@@ -57,22 +58,34 @@ fun HomeScreen(navController: NavController) {
 
     val viewModel: HomeViewModel =
         HomeViewModelFactory(LocalContext.current).create(HomeViewModel::class.java)
+
+
+
     Surface(
         modifier = Modifier
             .fillMaxSize()
             .background(Color.White)
     ) {
         ConstraintLayout(modifier = Modifier.fillMaxSize()) {
-            val (nameRow, list, card, topBar, add) = createRefs()
-            Image(painter = painterResource(id = R.drawable.ic_topbar),
+            val (nameRow, list, card, topBar, add, backgroundImage) = createRefs()
+
+            // Background Image
+            Image(
+                painter = painterResource(id = R.drawable.ic_avenger),
                 contentDescription = null,
                 modifier = Modifier
-                    .constrainAs(topBar) {
+                    .constrainAs(backgroundImage) {
                         top.linkTo(parent.top)
                         start.linkTo(parent.start)
                         end.linkTo(parent.end)
+                        bottom.linkTo(parent.bottom)
                     }
+                    .fillMaxSize() // Ensure the image covers the full screen
+
+                    .alpha(0.2f) // Optional: Reduce opacity to make it a background
+
             )
+
 
             Box(
                 Modifier
@@ -128,6 +141,7 @@ fun HomeScreen(navController: NavController) {
                     top.linkTo(nameRow.bottom)
                     start.linkTo(parent.start)
                     end.linkTo(parent.end)
+
                 },
                 balance = balance, income = income, expense = expense
             )
@@ -183,8 +197,10 @@ fun CardItem(
             .fillMaxWidth()
             .height(200.dp)
             .clip(RoundedCornerShape(16.dp))
-            .background(Zinc)
+            .background(Color(0xFF7C7C80).copy(alpha = 0.3f))
             .padding(16.dp)
+
+
     ) {
         Box(
             modifier = Modifier
@@ -218,6 +234,14 @@ fun CardItem(
                 .weight(1f),
 
             ) {
+
+            Image(
+                painter = painterResource(id = R.drawable.ic_shield),
+                contentDescription = null,
+                modifier = Modifier
+                    .fillMaxSize() // Ensures the image fills the box
+                    .align(Alignment.Center)
+            )
 
             CardRowItem(
                 modifier = Modifier.align(Alignment.CenterStart),
@@ -298,6 +322,8 @@ fun TransactionItem(
         modifier = Modifier
             .fillMaxWidth()
             .padding(vertical = 8.dp)
+            .clip(RoundedCornerShape(16.dp)) // Add rounded corners
+            .background(Color.Gray.copy(alpha = 0.3f)) // Transparent grey background
             .pointerInput(Unit) {
                 detectHorizontalDragGestures { _, dragAmount ->
                     offsetX = (offsetX + dragAmount).coerceIn(-300f, 0f) // Restrict movement
