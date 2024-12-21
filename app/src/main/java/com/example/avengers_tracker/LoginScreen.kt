@@ -20,6 +20,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
+import com.example.avengers_tracker.widgets.ExpenseTextView
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.android.gms.common.api.ApiException
@@ -67,18 +68,21 @@ fun LoginScreen(navController: NavController) {
     Box(modifier = Modifier.fillMaxSize()) {
         Surface(
             modifier = Modifier.fillMaxSize(),
-            color = Color(0xFFF5F5F5)
+            color = Color(0xFFFFFFFF)
         ) {
             Column(
                 modifier = Modifier.fillMaxSize(),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
+                
+
                 Image(
+
                     painter = painterResource(id = R.drawable.ic_topbar),
                     contentDescription = "Top Banner",
                     modifier = Modifier
                         .fillMaxWidth()
-                        .background(color = Color.Red.copy(alpha = 0.1f))
+
                 )
 
                 Column(
@@ -125,45 +129,10 @@ fun LoginScreen(navController: NavController) {
                             )
                         }
                     } else {
-                        Text(
-                            text = "Welcome, ${user?.displayName}",
-                            fontSize = 18.sp,
-                            color = Color.Black,
-                            modifier = Modifier.padding(bottom = 16.dp)
-                        )
-
-                        ElevatedButton(
-                            onClick = {
-                                isLoading = true
-                                scope.launch {
-                                    try {
-                                        val gso =
-                                            GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-                                                .requestIdToken(clientId)
-                                                .requestEmail()
-                                                .build()
-                                        val googleSignInClient =
-                                            GoogleSignIn.getClient(context, gso)
-                                        googleSignInClient.signOut() // Clear Google session
-                                        googleSignInClient.revokeAccess() // Revoke access
-                                        Firebase.auth.signOut() // Clear Firebase session
-                                        user = null
-                                    } catch (e: Exception) {
-                                        errorMessage = e.message
-                                    } finally {
-                                        isLoading = false
-                                    }
-                                }
-                            },
-                            colors = ButtonDefaults.elevatedButtonColors(containerColor = Color.Red),
-                            shape = RoundedCornerShape(8.dp),
-                            modifier = Modifier.padding(vertical = 16.dp)
-                        ) {
-                            Text(
-                                text = "Logout",
-                                fontSize = 16.sp,
-                                color = Color.White
-                            )
+                        LaunchedEffect(user) {
+                            navController.navigate("/home") {
+                                popUpTo(0) // Clear the backstack
+                            }
                         }
                     }
 
