@@ -17,6 +17,7 @@ class AddExpenseViewModel(val dao: ExpenseDao) : ViewModel() {
             false
         }
     }
+
 }
 
 class AddViewModelFactory(private val context: Context) : ViewModelProvider.Factory {

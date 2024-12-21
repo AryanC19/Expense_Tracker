@@ -33,30 +33,15 @@ abstract class ExpenseDataBase : RoomDatabase() {
             ).addMigrations(MIGRATION_1_2).addCallback(object : Callback() {
                 override fun onCreate(db: SupportSQLiteDatabase) {
                     super.onCreate(db)
-                    InitBasicData(context)
+                    //InitBasicData(context)
                 }
 
-                fun InitBasicData(context: Context) {
-                    CoroutineScope(Dispatchers.IO).launch {
-                        val dao = getDatabase(context).expenseDao()
-                        dao.insertExpense(
-                            ExpenseEntity(
-                                4,
-                                "WebFluid",
-                                1000.0,
-                                com.example.avengers_tracker.Utils.formatDateToHumanReadableForm(
-                                    System.currentTimeMillis()
-                                ),
-                                "GooglePay",
-                                type = "Expense"
-                            )
-                        )
-                    }
-                }
+
             }).build()
 
         }
     }
+
 }
 
 val MIGRATION_1_2 = object : Migration(1, 2) {

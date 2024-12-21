@@ -1,5 +1,6 @@
 package com.example.avengers_tracker
 
+import android.util.Log
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -146,8 +147,10 @@ fun DataForm(modifier: Modifier, onAddExpenseClick: (model: ExpenseEntity) -> Un
         mutableStateOf("")
     }
     val type = remember {
-        mutableStateOf("")
+        mutableStateOf("Expense") // or "Income" based on your requirement
     }
+
+
 
     Column(
         modifier = modifier
@@ -250,9 +253,10 @@ fun DataForm(modifier: Modifier, onAddExpenseClick: (model: ExpenseEntity) -> Un
         Spacer(modifier = Modifier.size(8.dp))
         ExpenseDropDown(
             listOf("Expense", "Income"),
-            onItemSelected = {
-                type.value = it
-            })
+            onItemSelected = { selectedType ->
+                type.value = selectedType
+            }
+        )
 
         Spacer(modifier = Modifier.size(12.dp))
 
@@ -269,6 +273,7 @@ fun DataForm(modifier: Modifier, onAddExpenseClick: (model: ExpenseEntity) -> Un
                     category = category.value,
                     type = type.value
                 )
+                Log.d("AddExpense", "Expense Type: ${type.value}")  // Log added here
                 onAddExpenseClick(model)
             }, modifier = Modifier
                 .clip(RoundedCornerShape(8.dp))

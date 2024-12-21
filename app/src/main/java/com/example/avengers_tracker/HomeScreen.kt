@@ -3,26 +3,40 @@ package com.example.avengers_tracker
 import android.text.Layout
 import android.view.Surface
 import android.widget.GridLayout
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.detectHorizontalDragGestures
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.constraintlayout.compose.ConstraintLayout
@@ -81,12 +95,20 @@ fun HomeScreen(navController: NavController) {
                     )
 
                 }
-
-                Image(
-                    painter = painterResource(id = R.drawable.ic_notification),
-                    contentDescription = null,
+                IconButton(
+                    onClick = {
+//                        Firebase.auth.signOut() // Sign-out functionality
+//                        user = null
+                    },
                     modifier = Modifier.align(Alignment.CenterEnd)
-                )
+                ) {
+                    Image(
+                        painter = painterResource(id = R.drawable.ic_back),
+                        contentDescription = "Sign Out",
+                        modifier = Modifier.size(24.dp) // Adjust size as needed
+                    )
+                }
+
             }
 
             //to store the changing fields
@@ -132,9 +154,7 @@ fun HomeScreen(navController: NavController) {
                     .background(Color.Green, shape = CircleShape)
                     .size(48.dp)
                     .clip(CircleShape)
-                    .clickable {
-                        navController.navigate("/add")
-                    }
+                    
             )
 
 
@@ -243,7 +263,11 @@ fun TransactionList(
                 amount = item.amount.toString(),
                 icon = viewModel.getItemIcon(item),
                 date = item.date.toString(),
-                color = if (item.type == "Income") Color.Green else Color.Red
+                color = if (item.type == "Income") Color.Green else Color.Red,
+                onDelete = {
+                    viewModel.deleteExpense(item)
+                },
+                onEdit = {}
             )
         }
     }
@@ -257,15 +281,61 @@ fun TransactionItem(
     icon: Int,
     date: String,
     color: Color,
-
-    ) {
+    onDelete: () -> Unit,
+    onEdit: () -> Unit
+) {
+    var offsetX by remember { mutableStateOf(0f) }
+    val swipeThreshold = 100f // Threshold for swipe action
+    val animatedOffsetX = animateFloatAsState(targetValue = offsetX)
 
     Box(
         modifier = Modifier
             .fillMaxWidth()
             .padding(vertical = 8.dp)
+            .pointerInput(Unit) {
+                detectHorizontalDragGestures { _, dragAmount ->
+                    offsetX = (offsetX + dragAmount).coerceIn(-300f, 0f) // Restrict movement
+                }
+            }
     ) {
-        Row(verticalAlignment = Alignment.CenterVertically) {
+        // Background with Delete and Edit icons
+        Row(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(Color.Gray) // Background color for the action row
+                .padding(horizontal = 4.dp),
+            horizontalArrangement = Arrangement.End,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            IconButton(onClick = onEdit) {
+                Icon(
+                    imageVector = Icons.Default.Edit,
+                    contentDescription = "Edit",
+                    tint = Color.Yellow
+                )
+            }
+            Spacer(modifier = Modifier.width(4.dp))
+            IconButton(onClick = onDelete) {
+                Icon(
+                    imageVector = Icons.Default.Delete,
+                    contentDescription = "Delete",
+                    tint = Color.Red
+                )
+            }
+        }
+
+        // Foreground with transaction details
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier
+                .offset { IntOffset(animatedOffsetX.value.toInt(), 0) } // Apply animation
+                .fillMaxWidth()
+                .background(Color.Black)
+                .padding(horizontal = 16.dp, vertical = 4.dp)
+                .shadow(8.dp, shape = RoundedCornerShape(50.dp)) // Increased shadow size
+                .clip(RoundedCornerShape(50.dp)) // Larger rounded corners
+        )
+        {
             Image(
                 painter = painterResource(id = icon),
                 contentDescription = null,
@@ -275,18 +345,19 @@ fun TransactionItem(
             Column {
                 ExpenseTextView(text = title, fontSize = 16.sp, fontWeight = FontWeight.Medium)
                 Spacer(modifier = Modifier.size(6.dp))
-                ExpenseTextView(text = date, fontSize = 13.sp, color = Color.White)
+                ExpenseTextView(text = date, fontSize = 13.sp, color = Color.Gray)
             }
+            Spacer(modifier = Modifier.weight(1f))
+            ExpenseTextView(
+                text = amount,
+                fontSize = 20.sp,
+                color = color,
+                fontWeight = FontWeight.SemiBold
+            )
         }
-        ExpenseTextView(
-            text = amount,
-            fontSize = 20.sp,
-            modifier = Modifier.align(Alignment.CenterEnd),
-            color = color,
-            fontWeight = FontWeight.SemiBold
-        )
     }
 }
+
 
 @Composable
 fun CardRowItem(modifier: Modifier, title: String, amount: String, image: Int) {

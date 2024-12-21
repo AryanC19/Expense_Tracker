@@ -1,9 +1,12 @@
 //package com.example.avengers_tracker
 //
 //import android.content.Intent
+//import android.os.Bundle
 //import android.util.Log
+//import androidx.activity.ComponentActivity
 //import androidx.activity.compose.ManagedActivityResultLauncher
 //import androidx.activity.compose.rememberLauncherForActivityResult
+//import androidx.activity.compose.setContent
 //import androidx.activity.result.ActivityResult
 //import androidx.activity.result.contract.ActivityResultContracts
 //import androidx.compose.runtime.Composable
@@ -11,10 +14,8 @@
 //import androidx.compose.runtime.mutableStateOf
 //import androidx.compose.foundation.Image
 //import androidx.compose.foundation.background
-//import androidx.compose.foundation.clickable
 //import androidx.compose.foundation.layout.*
 //import androidx.compose.foundation.shape.RoundedCornerShape
-//import androidx.compose.material3.Button
 //import androidx.compose.material3.ButtonDefaults
 //import androidx.compose.material3.ElevatedButton
 //import androidx.compose.material3.Surface
@@ -28,8 +29,6 @@
 //import androidx.compose.ui.platform.LocalContext
 //import androidx.compose.ui.res.painterResource
 //import androidx.compose.ui.res.stringResource
-//import androidx.compose.ui.text.font.FontFamily
-//import androidx.compose.ui.text.font.FontWeight
 //import androidx.compose.ui.tooling.preview.Preview
 //import androidx.compose.ui.unit.dp
 //import androidx.compose.ui.unit.sp
@@ -52,7 +51,7 @@
 //    val launcher = rememberFireBaseAuthLauncher(
 //        onAuthComplete = { result ->
 //            user = result.user
-//            navController.navigate("/home") // Ensure this matches the navigation graph
+//            // go to HomeScreen
 //        },
 //        onAuthError = { exception ->
 //            user = null
@@ -61,7 +60,7 @@
 //    )
 //
 //    val context = LocalContext.current
-//    val clientId = stringResource(id = R.string.client_id) // Use Web Client ID from Firebase
+//    val clientId = stringResource(id = R.string.client_id)
 //
 //    Surface(
 //        modifier = Modifier
@@ -70,6 +69,11 @@
 //    ) {
 //        ConstraintLayout(modifier = Modifier.fillMaxSize()) {
 //            val (nameRow, card) = createRefs()
+//            Image(
+//                painter = painterResource(id = R.drawable.ic_topbar),
+//                contentDescription = null,
+//                modifier = Modifier.fillMaxWidth()
+//            )
 //
 //            Column(
 //                modifier = Modifier
@@ -84,12 +88,14 @@
 //                horizontalAlignment = Alignment.CenterHorizontally
 //            ) {
 //                if (user == null) {
+//                    Spacer(modifier = Modifier.height(100.dp))
 //                    ElevatedButton(
 //                        onClick = {
-//                            val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-//                                .requestIdToken(clientId)
-//                                .requestEmail()
-//                                .build()
+//                            val gso =
+//                                GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+//                                    .requestIdToken(clientId)
+//                                    .requestEmail()
+//                                    .build()
 //                            val googleSignInClient = GoogleSignIn.getClient(context, gso)
 //                            launcher.launch(googleSignInClient.signInIntent)
 //                        },
@@ -103,35 +109,22 @@
 //                            contentColor = Color.Black
 //                        )
 //                    ) {
-//                        ExpenseTextView(
-//                            text = "Sign in with Google",
-//                            fontSize = 16.sp,
-//                            color = Color.Black
-//                        )
-//                        Spacer(modifier = Modifier.width(8.dp))
-//                        Image(
-//                            painter = painterResource(id = R.drawable.ic_google),
-//                            contentDescription = null,
-//                            modifier = Modifier.size(30.dp)
-//                        )
+//                        Row(verticalAlignment = Alignment.CenterVertically) {
+//                            ExpenseTextView(
+//                                text = "Sign in with Google",
+//                                fontSize = 16.sp,
+//                                color = Color.Black
+//                            )
+//                            Spacer(modifier = Modifier.width(8.dp))
+//                            Image(
+//                                painter = painterResource(id = R.drawable.ic_google),
+//                                contentDescription = null,
+//                                modifier = Modifier.size(30.dp)
+//                            )
+//                        }
 //                    }
 //                } else {
 //                    navController.navigate("/home")
-////                    ExpenseTextView(
-////                        text = "Welcome ${user?.displayName}",
-////                        fontSize = 24.sp,
-////                        color = Color.Black
-////                    )
-////                    Button(onClick = {
-////                        Firebase.auth.signOut()
-////                        user = null
-////                    }) {
-////                        ExpenseTextView(
-////                            text = "Sign Out",
-////                            fontSize = 16.sp,
-////                            color = Color.Black
-////                        )
-////                    }
 //                }
 //            }
 //        }
@@ -148,20 +141,24 @@
 //    return rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
 //        val task = GoogleSignIn.getSignedInAccountFromIntent(result.data)
 //
-//        try {
-//            val account = task.getResult(ApiException::class.java)!!
-//            val credentials = GoogleAuthProvider.getCredential(account.idToken, null)
+//        if (task.isSuccessful) {
+//            try {
+//                val account = task.getResult(ApiException::class.java)
+//                val credentials = GoogleAuthProvider.getCredential(account.idToken, null)
 //
-//            scope.launch {
-//                try {
-//                    val authResult = Firebase.auth.signInWithCredential(credentials).await()
-//                    onAuthComplete(authResult)
-//                } catch (e: Exception) {
-//                    onAuthError(e)
+//                scope.launch {
+//                    try {
+//                        val authResult = Firebase.auth.signInWithCredential(credentials).await()
+//                        onAuthComplete(authResult)
+//                    } catch (e: Exception) {
+//                        onAuthError(e)
+//                    }
 //                }
+//            } catch (e: ApiException) {
+//                onAuthError(e)
 //            }
-//        } catch (e: ApiException) {
-//            onAuthError(e)
+//        } else {
+//            onAuthError(Exception("Google Sign-In failed"))
 //        }
 //    }
 //}
@@ -175,4 +172,15 @@
 //    LoginScreen(
 //        navController = rememberNavController()
 //    )
+//}
+//
+//class HomeActivity : ComponentActivity() {
+//    override fun onCreate(savedInstanceState: Bundle?) {
+//        super.onCreate(savedInstanceState)
+//        setContent {
+//            HomeScreen(
+//                navController = NavController()
+//            )
+//        }
+//    }
 //}
