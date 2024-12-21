@@ -48,9 +48,12 @@ import com.example.avengers_tracker.ui.theme.Zinc
 import com.example.avengers_tracker.viewmodel.HomeViewModel
 import com.example.avengers_tracker.viewmodel.HomeViewModelFactory
 import com.example.avengers_tracker.widgets.ExpenseTextView
+import com.google.firebase.Firebase
+import com.google.firebase.auth.auth
 
 @Composable
 fun HomeScreen(navController: NavController) {
+    val user = Firebase.auth.currentUser
 
     val viewModel: HomeViewModel =
         HomeViewModelFactory(LocalContext.current).create(HomeViewModel::class.java)
@@ -88,7 +91,8 @@ fun HomeScreen(navController: NavController) {
                         color = Color.White
                     )
                     ExpenseTextView(
-                        text = "Welcome to your expenses",
+                        text = "Welcome, ${user?.displayName ?: "User"}",
+
                         fontSize = 20.sp,
                         color = Color.White,
                         fontWeight = FontWeight.Bold
@@ -97,8 +101,10 @@ fun HomeScreen(navController: NavController) {
                 }
                 IconButton(
                     onClick = {
-//                        Firebase.auth.signOut() // Sign-out functionality
-//                        user = null
+                        Firebase.auth.signOut() // Sign out the user
+                        navController.navigate("/login") { // Navigate to the login screen
+                            popUpTo(0) // Clear the backstack
+                        }
                     },
                     modifier = Modifier.align(Alignment.CenterEnd)
                 ) {
@@ -154,7 +160,7 @@ fun HomeScreen(navController: NavController) {
                     .background(Color.Green, shape = CircleShape)
                     .size(48.dp)
                     .clip(CircleShape)
-                    
+
             )
 
 

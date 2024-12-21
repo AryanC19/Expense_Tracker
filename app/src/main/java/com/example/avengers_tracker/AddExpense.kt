@@ -1,6 +1,7 @@
 package com.example.avengers_tracker
 
 import android.util.Log
+import android.widget.Toast
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -21,6 +22,7 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
 import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -127,30 +129,15 @@ fun AddExpense(navController: NavController) {
 
 @Composable
 fun DataForm(modifier: Modifier, onAddExpenseClick: (model: ExpenseEntity) -> Unit) {
+    val name = remember { mutableStateOf("") }
+    val amount = remember { mutableStateOf("") }
+    val date = remember { mutableStateOf(0L) }
+    val dateDialogVisibility = remember { mutableStateOf(false) }
+    val category = remember { mutableStateOf("") }
+    val type = remember { mutableStateOf("Expense") }
+    val errorMessage = remember { mutableStateOf<String?>(null) }
 
-    val name = remember {
-        mutableStateOf("")
-    }
-
-    val amount = remember {
-        mutableStateOf("")
-    }
-
-    val date = remember {
-        mutableStateOf(0L)
-    }
-
-    val dateDialogVisibility = remember {
-        mutableStateOf(false)
-    }
-    val category = remember {
-        mutableStateOf("")
-    }
-    val type = remember {
-        mutableStateOf("Expense") // or "Income" based on your requirement
-    }
-
-
+    val context = LocalContext.current
 
     Column(
         modifier = modifier
@@ -162,8 +149,7 @@ fun DataForm(modifier: Modifier, onAddExpenseClick: (model: ExpenseEntity) -> Un
             .padding(16.dp)
             .verticalScroll(rememberScrollState())
     ) {
-
-        //Title
+        // Title
         ExpenseTextView(
             color = Color.Black,
             text = "Title",
@@ -172,16 +158,14 @@ fun DataForm(modifier: Modifier, onAddExpenseClick: (model: ExpenseEntity) -> Un
         Spacer(modifier = Modifier.size(8.dp))
         OutlinedTextField(
             value = name.value,
-            onValueChange = {
-                name.value = it
-            },
+            onValueChange = { name.value = it },
             modifier = Modifier.fillMaxWidth(),
-            textStyle = TextStyle(
-                color = Color.Black // Replace with your desired color
-            )
+            textStyle = TextStyle(color = Color.Black)
         )
+
         Spacer(modifier = Modifier.size(16.dp))
-        //Amount
+
+        // Amount
         ExpenseTextView(
             color = Color.Black,
             text = "Amount",
@@ -190,27 +174,19 @@ fun DataForm(modifier: Modifier, onAddExpenseClick: (model: ExpenseEntity) -> Un
         Spacer(modifier = Modifier.size(8.dp))
         OutlinedTextField(
             value = amount.value,
-            onValueChange = {
-                amount.value = it
-            },
+            onValueChange = { amount.value = it },
             modifier = Modifier.fillMaxWidth(),
-            textStyle = TextStyle(
-                color = Color.Blue // Replace with your desired color
-            )
+            textStyle = TextStyle(color = Color.Blue)
         )
+
+        // Date
         Spacer(modifier = Modifier.size(12.dp))
-
-        //date calendar
-
         ExpenseTextView(
             color = Color.Black,
             text = "Date",
             fontSize = 14.sp,
         )
-
-
         Spacer(modifier = Modifier.size(8.dp))
-
         OutlinedTextField(
             value = if (date.value == 0L) "" else Utils.formatDateToHumanReadableForm(date.value),
             onValueChange = {},
@@ -226,9 +202,10 @@ fun DataForm(modifier: Modifier, onAddExpenseClick: (model: ExpenseEntity) -> Un
                 disabledContainerColor = Color.White
             )
         )
+
         Spacer(modifier = Modifier.size(12.dp))
 
-        //Category
+        // Category
         ExpenseTextView(
             color = Color.Black,
             text = "Category",
@@ -237,14 +214,12 @@ fun DataForm(modifier: Modifier, onAddExpenseClick: (model: ExpenseEntity) -> Un
         Spacer(modifier = Modifier.size(8.dp))
         ExpenseDropDown(
             listOf("GooglePay", "Paypal", "PhonePay", "Cash", "PayTM", "Visa"),
-            onItemSelected = {
-                category.value = it
-            })
+            onItemSelected = { category.value = it }
+        )
 
         Spacer(modifier = Modifier.size(12.dp))
 
-
-        //Type (Income,Expense)
+        // Type (Income, Expense)
         ExpenseTextView(
             color = Color.Black,
             text = "Type",
@@ -253,29 +228,46 @@ fun DataForm(modifier: Modifier, onAddExpenseClick: (model: ExpenseEntity) -> Un
         Spacer(modifier = Modifier.size(8.dp))
         ExpenseDropDown(
             listOf("Expense", "Income"),
-            onItemSelected = { selectedType ->
-                type.value = selectedType
-            }
+            onItemSelected = { selectedType -> type.value = selectedType }
         )
 
         Spacer(modifier = Modifier.size(12.dp))
 
-
-        //Button, Main Passes to ROOMDB
-
+        // Button - Save
         Button(
             onClick = {
-                val model = ExpenseEntity(
-                    id = null,
-                    title = name.value,
-                    amount = amount.value.toDoubleOrNull() ?: 0.0,
-                    date = Utils.formatDateToHumanReadableForm(date.value),
-                    category = category.value,
-                    type = type.value
-                )
-                Log.d("AddExpense", "Expense Type: ${type.value}")  // Log added here
-                onAddExpenseClick(model)
-            }, modifier = Modifier
+                // Validation
+                val amountValue = amount.value.toDoubleOrNull()
+                when {
+                    name.value.isEmpty() -> {
+                        errorMessage.value = "Title cannot be empty"
+                        Toast.makeText(context, "Title cannot be empty", Toast.LENGTH_SHORT).show()
+                    }
+
+                    amountValue == null || amountValue <= 0 -> {
+                        errorMessage.value = "Amount must be a positive number"
+                        Toast.makeText(
+                            context,
+                            "Amount must be a positive number",
+                            Toast.LENGTH_SHORT
+                        ).show()
+                    }
+
+                    else -> {
+                        val model = ExpenseEntity(
+                            id = null,
+                            title = name.value,
+                            amount = amountValue,
+                            date = Utils.formatDateToHumanReadableForm(date.value),
+                            category = category.value,
+                            type = type.value
+                        )
+                        Log.d("AddExpense", "Expense Type: ${type.value}")
+                        onAddExpenseClick(model)
+                    }
+                }
+            },
+            modifier = Modifier
                 .clip(RoundedCornerShape(8.dp))
                 .align(Alignment.CenterHorizontally),
             colors = ButtonDefaults.buttonColors(
@@ -286,10 +278,9 @@ fun DataForm(modifier: Modifier, onAddExpenseClick: (model: ExpenseEntity) -> Un
                 text = "Save",
                 color = Color.White,
                 fontSize = 18.sp,
-
-                )
-
+            )
         }
+
         if (dateDialogVisibility.value) {
             ExpenseDatePickerDialog(
                 onDateSelected = {
@@ -301,7 +292,6 @@ fun DataForm(modifier: Modifier, onAddExpenseClick: (model: ExpenseEntity) -> Un
                 }
             )
         }
-
     }
 }
 
