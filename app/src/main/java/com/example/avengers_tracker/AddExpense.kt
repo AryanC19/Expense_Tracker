@@ -50,12 +50,16 @@ import com.example.avengers_tracker.widgets.ExpenseTextView
 import kotlinx.coroutines.launch
 
 @Composable
-fun AddExpense(navController: NavController) {
+fun AddExpense(navController: NavController, expenseEntity: ExpenseEntity? = null) {
 
     val viewModel =
         AddViewModelFactory(LocalContext.current).create(AddExpenseViewModel::class.java)
 
-    val coroutineScope = rememberCoroutineScope();
+    val coroutineScope = rememberCoroutineScope()
+    val title = remember { mutableStateOf(expenseEntity?.title ?: "") }
+    val amount = remember { mutableStateOf(expenseEntity?.amount?.toString() ?: "") }
+    val category = remember { mutableStateOf(expenseEntity?.category ?: "") }
+
     Surface(modifier = Modifier.fillMaxSize()) {
         ConstraintLayout(modifier = Modifier.fillMaxSize()) {
 
@@ -72,20 +76,20 @@ fun AddExpense(navController: NavController) {
                         end.linkTo(parent.end)
                         bottom.linkTo(parent.bottom)
                     }
-                    .fillMaxSize() // Ensure the image covers the full screen
-
-                    .alpha(0.2f) // Optional: Reduce opacity to make it a background
-
+                    .fillMaxSize()
+                    .alpha(0.2f)
             )
-            Box(modifier = Modifier
-                .fillMaxWidth()
-                .padding(top = 32.dp, start = 16.dp, end = 16.dp)
-                .constrainAs(nameRow) {
-                    top.linkTo(parent.top)
-                    start.linkTo(parent.start)
-                    end.linkTo(parent.end)
 
-                }) {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 32.dp, start = 16.dp, end = 16.dp)
+                    .constrainAs(nameRow) {
+                        top.linkTo(parent.top)
+                        start.linkTo(parent.start)
+                        end.linkTo(parent.end)
+                    }
+            ) {
                 IconButton(
                     onClick = { navController.navigateUp() },
                     modifier = Modifier.align(Alignment.CenterStart)
@@ -96,22 +100,19 @@ fun AddExpense(navController: NavController) {
                     )
                 }
                 ExpenseTextView(
-                    text = "Add Expense",
+                    text = if (expenseEntity != null) "Edit Expense" else "Add Expense",
                     fontSize = 20.sp,
                     color = Color.White,
                     fontWeight = FontWeight.Bold,
                     modifier = Modifier
                         .padding(4.dp)
                         .align(Alignment.Center)
-
                 )
-
                 Image(
                     painter = painterResource(id = R.drawable.dots_menu),
                     contentDescription = null,
                     modifier = Modifier.align(Alignment.CenterEnd)
                 )
-
             }
 
             DataForm(
@@ -122,23 +123,36 @@ fun AddExpense(navController: NavController) {
                         start.linkTo(parent.start)
                         end.linkTo(parent.end)
                     },
-                onAddExpenseClick = {
+                initialTitle = title.value,
+                initialAmount = amount.value,
+                initialCategory = category.value,
+                onAddExpenseClick = { newExpense ->
                     coroutineScope.launch {
-                        if (
-                            viewModel.addExpense(it)) {
-                            navController.popBackStack()
+                        if (expenseEntity == null) {
+                            viewModel.addExpense(newExpense) // Add new expense
+                        } else {
+                            viewModel.updateExpense(newExpense.copy(id = expenseEntity.id)) // Update existing expense
                         }
+                        navController.popBackStack()
                     }
-
                 }
             )
         }
     }
 }
 
+
 @Composable
-fun DataForm(modifier: Modifier, onAddExpenseClick: (model: ExpenseEntity) -> Unit) {
-    val name = remember { mutableStateOf("") }
+fun DataForm(
+    modifier: Modifier = Modifier,
+    initialTitle: String = "",
+    initialAmount: String = "",
+    initialType: String = "Expense",
+    initialCategory: String = "Others",
+    onAddExpenseClick: (ExpenseEntity) -> Unit
+
+) {
+    val title = remember { mutableStateOf(initialTitle) }
     val amount = remember { mutableStateOf("") }
     val date = remember { mutableStateOf(0L) }
     val dateDialogVisibility = remember { mutableStateOf(false) }
@@ -168,8 +182,8 @@ fun DataForm(modifier: Modifier, onAddExpenseClick: (model: ExpenseEntity) -> Un
         )
         Spacer(modifier = Modifier.size(8.dp))
         OutlinedTextField(
-            value = name.value,
-            onValueChange = { name.value = it },
+            value = title.value,
+            onValueChange = { title.value = it },
             modifier = Modifier.fillMaxWidth(),
             textStyle = TextStyle(color = Color.White)
         )
@@ -254,7 +268,7 @@ fun DataForm(modifier: Modifier, onAddExpenseClick: (model: ExpenseEntity) -> Un
                 // Validation
                 val amountValue = amount.value.toDoubleOrNull()
                 when {
-                    name.value.isEmpty() -> {
+                    title.value.isEmpty() -> {
                         errorMessage.value = "Title cannot be empty"
                         Toast.makeText(context, "Title cannot be empty", Toast.LENGTH_SHORT).show()
                     }
@@ -271,7 +285,7 @@ fun DataForm(modifier: Modifier, onAddExpenseClick: (model: ExpenseEntity) -> Un
                     else -> {
                         val model = ExpenseEntity(
                             id = null,
-                            title = name.value,
+                            title = title.value,
                             amount = amountValue,
                             date = Utils.formatDateToHumanReadableForm(date.value),
                             category = category.value,

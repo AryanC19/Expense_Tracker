@@ -13,13 +13,20 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Surface
+import androidx.compose.material3.TextField
+import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -36,12 +43,14 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
+import androidx.core.os.bundleOf
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.example.avengers_tracker.data.model.ExpenseEntity
@@ -51,6 +60,7 @@ import com.example.avengers_tracker.viewmodel.HomeViewModelFactory
 import com.example.avengers_tracker.widgets.ExpenseTextView
 import com.google.firebase.Firebase
 import com.google.firebase.auth.auth
+import com.google.gson.Gson
 
 @Composable
 fun HomeScreen(navController: NavController) {
@@ -67,7 +77,7 @@ fun HomeScreen(navController: NavController) {
             .background(Color.White)
     ) {
         ConstraintLayout(modifier = Modifier.fillMaxSize()) {
-            val (nameRow, list, card, topBar, add, backgroundImage) = createRefs()
+            val (nameRow, list, card, searchBar, add, backgroundImage) = createRefs()
 
             // Background Image
             Image(
@@ -145,17 +155,37 @@ fun HomeScreen(navController: NavController) {
                 },
                 balance = balance, income = income, expense = expense
             )
+
+
+            //Search Box
+
+            SearchBar(
+                onSearch = { query ->
+                    viewModel.updateSearchQuery(query)
+                },
+                modifier = Modifier.constrainAs(searchBar) {
+                    top.linkTo(card.bottom)
+                    start.linkTo(parent.start)
+                    end.linkTo(parent.end)
+                }
+            )
             TransactionList(
                 modifier = Modifier
                     .fillMaxWidth()
                     .constrainAs(list) {
-                        top.linkTo(card.bottom)
+                        top.linkTo(searchBar.bottom)  // Changed from card.bottom to searchBar.bottom
                         start.linkTo(parent.start)
                         end.linkTo(parent.end)
                         bottom.linkTo(parent.bottom)
                         height = Dimension.fillToConstraints
                     },
-                list = state.value, viewModel = viewModel
+                list = if (viewModel.filteredExpenses.collectAsState().value.isEmpty()) {
+                    state.value
+                } else {
+                    viewModel.filteredExpenses.collectAsState().value
+                },
+                viewModel = viewModel,
+                navController = navController
             )
 
             Image(
@@ -217,7 +247,7 @@ fun CardItem(
                 ExpenseTextView(
                     text = balance,
                     fontSize = 20.sp,
-                    color = Color.White,
+                    color = Color.Green,
                     fontWeight = FontWeight.SemiBold,
                 )
             }
@@ -247,8 +277,8 @@ fun CardItem(
                 modifier = Modifier.align(Alignment.CenterStart),
                 title = "Income",
                 amount = income,
-                image = R.drawable.ic_income
-
+                image = R.drawable.ic_income,
+                color = Color.Green
             )
 
             Spacer(modifier = Modifier.size(8.dp))
@@ -257,7 +287,8 @@ fun CardItem(
                 modifier = Modifier.align(Alignment.CenterEnd),
                 title = "Expense",
                 amount = expense,
-                image = R.drawable.ic_expense
+                image = R.drawable.ic_expense,
+                color = Color.Red
             )
 
         }
@@ -269,6 +300,7 @@ fun CardItem(
 fun TransactionList(
     modifier: Modifier = Modifier,
     list: List<ExpenseEntity>,
+    navController: NavController,
 
     viewModel: HomeViewModel
 ) {
@@ -297,7 +329,12 @@ fun TransactionList(
                 onDelete = {
                     viewModel.deleteExpense(item)
                 },
-                onEdit = {}
+                onEdit = {
+                    val expenseEntityJson = Gson().toJson(item) // Using Gson for JSON serialization
+                    navController.navigate("/add?expenseEntity=$expenseEntityJson")
+                }
+
+
             )
         }
     }
@@ -392,7 +429,7 @@ fun TransactionItem(
 
 
 @Composable
-fun CardRowItem(modifier: Modifier, title: String, amount: String, image: Int) {
+fun CardRowItem(modifier: Modifier, title: String, amount: String, image: Int, color: Color) {
     Column(modifier = modifier) {
         Row {
             Image(
@@ -406,9 +443,62 @@ fun CardRowItem(modifier: Modifier, title: String, amount: String, image: Int) {
         ExpenseTextView(
             text = amount,
             fontSize = 20.sp,
-            color = Color.White,
+            color = color,
 
             )
+    }
+}
+
+
+@Composable
+fun SearchBar(
+    onSearch: (String) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    var searchText by remember { mutableStateOf("") }
+    var isSearchActive by remember { mutableStateOf(false) }
+
+    Column(
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp, vertical = 8.dp)
+            .clip(RoundedCornerShape(50.dp))
+    ) {
+        OutlinedTextField(
+            value = searchText,
+            onValueChange = { searchText = it },
+            modifier = Modifier
+                .fillMaxWidth()
+
+                .padding(horizontal = 16.dp, vertical = 8.dp)
+
+                .background(Color.Gray.copy(alpha = 0.1f)),
+            shape = RoundedCornerShape(50.dp),
+
+            placeholder = { ExpenseTextView("Search transactions...", color = Color.Gray) },
+            colors = OutlinedTextFieldDefaults.colors(
+                disabledTextColor = Color.White,
+                disabledBorderColor = Color.White,
+                disabledPlaceholderColor = Color.White,
+            ),
+            keyboardOptions = KeyboardOptions(
+                imeAction = ImeAction.Search
+            ),
+            keyboardActions = KeyboardActions(
+                onSearch = {
+                    onSearch(searchText)
+                    isSearchActive = true
+                }
+            ),
+            leadingIcon = {
+                Icon(
+                    imageVector = Icons.Default.Search,
+                    contentDescription = "Search",
+                    tint = Color.Gray
+                )
+            },
+            singleLine = true
+        )
     }
 }
 
