@@ -92,6 +92,11 @@ fun LoginScreen(navController: NavController) {
                         .alpha(0.2f) // Optional: Reduce opacity to make it a background
 
                 )
+
+
+
+
+
                 Column(
                     modifier = Modifier.fillMaxSize(),
                     horizontalAlignment = Alignment.Start
@@ -107,6 +112,10 @@ fun LoginScreen(navController: NavController) {
 
 
                     )
+
+
+
+
 
                     Column(
                         modifier = Modifier
